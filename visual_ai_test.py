@@ -301,7 +301,7 @@ class VisualAITester:
         return summary
 
     def print_banner():
-        """Print cool banner"""
+        """Print banner"""
         banner = """
         ╔═══════════════════════════════════════════════════════════╗
         ║                                                           ║
