@@ -210,3 +210,60 @@ class VisualAITester:
         cv2.imwrite(str(diff_path), comparison)
     
         return diff_path
+
+    def _create_comparison_image(self, baseline, current, diff):
+        """ Create a side-by-side comparison image showing baseline, current, and diff """
+        # Add labels to each image
+        baseline_labeled = baseline.copy()
+        current_labeled = current.copy()
+        diff_labeled = diff.copy()
+
+        # add text labels i.e font, position, size, thickness and color
+        cv2.putText(baseline_labeled, 'BASELINE', (50, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4)
+        cv2.putText(current_labeled, 'CURRENT', (50, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 165, 0), 4)
+        cv2.putText(diff_labeled, 'DIFFERENCES', (50, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 4)
+
+        # Stack images horizontally
+        comparison = np.hstack((baseline_labeled, current_labeled, diff_labeled))
+
+        return comparison
+    
+    def run_test(self, url, test_name, threshold=0.95):
+        """
+            Run complete visual regression test
+            
+            Args:
+                url: URL to test
+                test_name: Unique name for this test
+                threshold: Similarity threshold (0.95 = 95%)
+                
+            Returns:
+                Test result dictionary
+        """
+        print(f"\n{'='*70}")
+        print(f"🤖 AI VISUAL REGRESSION TEST: {test_name}")
+        print(f"{'='*70}\n")
+
+        try:
+            # Step 1: Capture screenshot
+            screenshot = self.capture_screenshot(url, test_name)
+
+            # Step 2: Compare with baseline using AI
+            result = self.compare_with_baseline(screenshot, test_name, threshold)
+
+            return result
+
+        except Exception as e:
+            print(f"❌ TEST ERROR: {e}\n")
+            result = {
+                'test_name': test_name,
+                'status': 'ERROR',
+                'error': str(e),
+                'timestamp': datetime.now().isoformat()
+            }
+            self.test_results.append(result)
+            return result
+
