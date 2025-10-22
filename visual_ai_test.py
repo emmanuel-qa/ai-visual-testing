@@ -1,3 +1,4 @@
+import shutil
 from symbol import comparison
 import cv2
 import numpy as np
@@ -267,3 +268,54 @@ class VisualAITester:
             self.test_results.append(result)
             return result
 
+    def generate_report(self, report_name="visual_test_report.json"):
+        """ Generate a JSON report of all test results """
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        report_path = self.results_dir / f"test_report_{timestamp}.json"
+
+        summary = {
+        'timestamp': datetime.now().isoformat(),
+        'total_tests': len(self.test_results),
+        'passed': sum(1 for r in self.test_results if r['status'] == 'PASS'),
+        'failed': sum(1 for r in self.test_results if r['status'] == 'FAIL'),
+        'baselines_created': sum(1 for r in self.test_results if r['status'] == 'BASELINE_CREATED'),
+        'errors': sum(1 for r in self.test_results if r['status'] == 'ERROR'),
+        'results': self.test_results
+    }
+        
+        with open(report_path, 'w') as f:
+            json.dump(summary, f, indent=2)
+    
+        print(f"\n{'='*70}")
+        print(f"📊 TEST REPORT GENERATED")
+        print(f"{'='*70}")
+        print(f"📁 Report: {report_path}")
+        print(f"📈 Total Tests: {summary['total_tests']}")
+        print(f"✅ Passed: {summary['passed']}")
+        print(f"❌ Failed: {summary['failed']}")
+        print(f"🆕 Baselines Created: {summary['baselines_created']}")
+        if summary['errors'] > 0:
+            print(f"⚠️  Errors: {summary['errors']}")
+        print(f"{'='*70}\n")
+    
+        return summary
+
+    def print_banner():
+        """Print cool banner"""
+        banner = """
+        ╔═══════════════════════════════════════════════════════════╗
+        ║                                                           ║
+        ║        🤖 AI-POWERED VISUAL REGRESSION TESTING 🤖         ║
+        ║                                                           ║
+        ║              Using Computer Vision & SSIM                 ║
+        ║                 By Emmanuel Kuye                          ║
+        ║                                                           ║
+        ╚═══════════════════════════════════════════════════════════╝
+        """
+        print(banner)
+
+    
+    if __name__ == "__main__":
+        print_banner()
+        print("\n⚡ Quick Demo Mode")
+        print("Run example_usage.py for full demo\n")
