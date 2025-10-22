@@ -1,3 +1,4 @@
+from symbol import comparison
 import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
@@ -166,3 +167,46 @@ class VisualAITester:
 
         self.test_results.append(result)
         return result
+
+    def _generate_diff_image(self, current_img, baseline_img, diff_image, test_name):
+        """ generate a visual difference image highlighting where changes occured
+        This uses computer vision to find and highlight differences
+        """
+        print(f"   🎨 Generating visual diff...")
+
+        # convert ssim difference to a usable format
+        diff_image = (diff_image * 255).astype("uint8")
+
+        # threshold to find significant differences
+        thresh = cv2.threshold(diff_image, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+
+        # find boundaries (contours) of differences 
+        countours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # draw red boxes around the differences
+        diff_highlighted = current_img.copy()
+
+        significant_changes = 0
+        total_area = 0
+
+        for contour in countours:
+            area = cv2.contourArea(contour)
+
+            # only highlight significant differneces and should ignore tiny variations
+            if area > 100: # minimum of 100 pixels
+                x, y, w, h = cv2.boundingRect(contour)
+                cv2.rectangle(diff_highlighted, (x, y), (x + w, y + h),
+                              (0, 0, 255), 2) # red box, 2 px thick
+                significant_changes += 1
+                total_area += area
+
+        print(f"     ⚠️ Significant changes detected: {significant_changes} areas, Total changed area: {total_area} pixels")
+
+        # create a side-by-side comparison image
+        comparison = self._create_side_by_side(baseline_img, current_img, diff_highlighted)
+
+        # Save diff image
+        diff_path = self.results_dir / f"{test_name}_diff_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png" 
+        cv2.imwrite(str(diff_path), comparison)
+    
+        return diff_path
