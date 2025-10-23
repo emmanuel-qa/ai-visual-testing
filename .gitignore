@@ -1,1 +1,46 @@
-/venv
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Visual Testing - Results (generated files)
+results/*.png
+results/*.json
+results/*_diff_*.png
+current_*.png
+
+# Keep the results directory structure
+!results/.gitkeep
+
+# Baselines - KEEP THESE (committed for team)
+# Comment out if you want to track baselines:
+# baselines/*.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*~

@@ -1,5 +1,4 @@
 import shutil
-from symbol import comparison
 import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
@@ -48,32 +47,53 @@ class VisualAITester:
         print(f"🌐 URL: {url}")
         
         with sync_playwright() as p:
-            # lauch a headless browser
-            browser = p.chromium.launch(headless=True)
-
-            #create a page with standard desktop viewport
-            page = browser.new_page(viewport={'width': 1920, 'height': 1080})
-
-            try:
-                # navigate to URL
-                page.goto(url, wait_until='domcontentloaded', timeout=30000)
-
-                # wait for everything to load
-                page.wait_for_timeout(2000)
-
-                # take screenshots
-                screenshot_path = f"current_{test_name}.png"
-                page.screenshot(path=screenshot_path, full_page=False)
-
-                print(f"📸 Screenshot saved: {screenshot_path}")
-                return screenshot_path
-
-            except Exception as e:
-                print(f"❌ Error capturing screenshot: {e}")
-                return None
-
-            finally:
-                browser.close()
+            # Try each browser until one successfully captures the screenshot
+            # This handles both launch failures AND navigation failures
+            browsers_to_try = [
+                (p.firefox, 'Firefox'),
+                (p.chromium, 'Chromium'),
+                (p.webkit, 'WebKit')
+            ]
+            
+            last_error = None
+            
+            for browser_type, browser_name in browsers_to_try:
+                try:
+                    # Try to launch browser
+                    browser = browser_type.launch(headless=True)
+                    print(f"   ✓ Launched {browser_name} browser")
+                    
+                    # Create page with standard desktop viewport
+                    page = browser.new_page(viewport={'width': 1920, 'height': 1080})
+                    
+                    # Try to navigate to URL
+                    page.goto(url, wait_until='domcontentloaded', timeout=30000)
+                    
+                    # Wait for everything to load
+                    page.wait_for_timeout(2000)
+                    
+                    # Take screenshot - save to results folder
+                    screenshot_path = self.results_dir / f"current_{test_name}.png"
+                    page.screenshot(path=str(screenshot_path), full_page=False)
+                    
+                    print(f"   ✓ Screenshot captured successfully with {browser_name}")
+                    print(f"📸 Screenshot saved: {screenshot_path}")
+                    
+                    browser.close()
+                    return str(screenshot_path)
+                    
+                except Exception as e:
+                    last_error = e
+                    print(f"   ✗ {browser_name} failed: {str(e)[:100]}")
+                    try:
+                        browser.close()
+                    except:
+                        pass
+                    continue
+            
+            # If we got here, all browsers failed
+            print(f"❌ All browsers failed. Last error: {last_error}")
+            return None
 
     def compare_with_baseline(self, current_screenshot, test_name, threshold=0.95):
         """ 
@@ -122,7 +142,7 @@ class VisualAITester:
             baseline_img = cv2.resize(baseline_img, (current_img.shape[1], current_img.shape[0]))
 
         # now convert to grayscale as SSIM works on single channel images
-        gray_current = cv2.ccvtColor(current_img, cv2.COLOR_BGR2GRAY)
+        gray_current = cv2.cvtColor(current_img, cv2.COLOR_BGR2GRAY)
         gray_baseline = cv2.cvtColor(baseline_img, cv2.COLOR_BGR2GRAY)
             
         # 🧠 THE actual AI PART: Calculate SSIM by mimicing human visual perception
@@ -166,9 +186,6 @@ class VisualAITester:
         self.test_results.append(result)
         return result
 
-        self.test_results.append(result)
-        return result
-
     def _generate_diff_image(self, current_img, baseline_img, diff_image, test_name):
         """ generate a visual difference image highlighting where changes occured
         This uses computer vision to find and highlight differences
@@ -204,7 +221,7 @@ class VisualAITester:
         print(f"     ⚠️ Significant changes detected: {significant_changes} areas, Total changed area: {total_area} pixels")
 
         # create a side-by-side comparison image
-        comparison = self._create_side_by_side(baseline_img, current_img, diff_highlighted)
+        comparison = self._create_comparison_image(baseline_img, current_img, diff_highlighted)
 
         # Save diff image
         diff_path = self.results_dir / f"{test_name}_diff_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png" 
@@ -300,7 +317,7 @@ class VisualAITester:
     
         return summary
 
-    def print_banner():
+    def print_banner(self):
         """Print banner"""
         banner = """
         ╔═══════════════════════════════════════════════════════════╗

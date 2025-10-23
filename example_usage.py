@@ -100,12 +100,12 @@ def advanced_example():
     tester.generate_report()
     
     
-    if __name__ == "__main__":
-        # Run the demo
-        demo()
+if __name__ == "__main__":
+    # run demo
+    demo()
 
-    # Uncomment to try custom test
-    # custom_test_example()
+        # Uncomment to try custom test
+        # custom_test_example()
 
-    # Uncomment to try advanced example
+        # Uncomment to try advanced example
     # advanced_example()
