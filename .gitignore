@@ -6,6 +6,7 @@ __pycache__/
 .Python
 venv/
 env/
+demo1.py
 ENV/
 *.egg-info/
 dist/
