@@ -156,7 +156,7 @@ class VisualAITester:
         # Find contours of differences
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
-        # Draw red boxes on current image (preserves color)
+        # Draw red boxes on current image 
         diff_highlighted = current_img.copy()
         
         for contour in contours:
@@ -211,11 +211,3 @@ class VisualAITester:
         return report
 
 
-# NOTE: All print statements are commented out for clean output
-# Uncomment any print() lines below if you want detailed logging
-
-# Example print statements you can uncomment:
-# print(f"📸 Capturing screenshot: {test_name}")
-# print(f"✅ Test passed: {similarity_score*100:.2f}%")
-# print(f"❌ Test failed: {similarity_score*100:.2f}%")
-# print(f"🎨 Generated diff: {diff_path}")

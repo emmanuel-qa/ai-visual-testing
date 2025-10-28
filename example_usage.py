@@ -52,7 +52,7 @@ def demo():
     print("   1. Check the 'baselines' folder - you'll see baseline images")
     print("   2. Check the 'results' folder - you'll see test reports")
     print("   3. Run this script AGAIN to see AI comparison in action")
-    print("   4. If any differences are found, check results folder for visual diffs\n")
+    print("   4. If any differences are found, check results folder for visual diffs image\n")
 
     return summary
 
