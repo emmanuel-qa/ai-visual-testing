@@ -50,12 +50,6 @@ playwright install chromium firefox webkit
 ### 2. Run the Demo
 
 ```bash
-# Simple demo (no internet required)
-python simple_demo.py
-
-# Local HTML test
-python local_test.py
-
 # Test real websites (requires internet)
 python example_usage.py
 ```
@@ -71,7 +65,6 @@ python example_usage.py
 ✅ **Organized File Structure** - All screenshots in results/ folder  
 ✅ **JSON Reports** - Detailed test results with timestamps  
 ✅ **Configurable Thresholds** - Set custom similarity requirements  
-✅ **No Internet Required** - Works with local HTML files and data URLs  
 
 ---
 
@@ -79,13 +72,12 @@ python example_usage.py
 
 ```
 ai-visual-testing/
-├── visual_ai_test.py      # Main tool
+├── visual_AI_tester.py      # Main tool
 ├── example_usage.py       # Demo with external websites
-├── local_test.py          # Demo with local HTML files
-├── simple_demo.py         # Simple demo using data URLs
+├── demo_pages/         # Simple demo using data URLs
 ├── requirements.txt       # Dependencies
 ├── baselines/            # Baseline images (auto-created)
-├── results/              # Test results, diffs, and screenshots
+├── results/            # Test results, diffs, and screenshots
 └── README.md            # This file
 ```
 
@@ -141,15 +133,12 @@ tester.generate_report()
 
 ## 🔧 How It Works
 
-### 1. First Run - Create Baseline
+### 1. First Run - Create Baseline and compares with new releases
 ```
 📸 Capture screenshot
 💾 Save as baseline
 🆕 Status: BASELINE_CREATED
-```
 
-### 2. Subsequent Runs - Compare with AI
-```
 📸 Capture new screenshot
 🤖 AI analyzes both images using SSIM
 📊 Calculate similarity score (0-100%)
@@ -173,7 +162,7 @@ tester.generate_report()
 
 **SSIM = Structural Similarity Index Measure**
 
-The algorithm analyzes three components:
+The algorithm analyses three components:
 
 1. **Luminance**: How bright are the images?
 2. **Contrast**: How much variation is there?
@@ -207,18 +196,8 @@ playwright install firefox
 **Solution:** 
 - Temporarily disable firewall/antivirus
 - Or use `headless=False` to see browser window
-- Or use the `simple_demo.py` which doesn't need internet
 
-### Network Issues
 
-**Problem:** `net::ERR_TUNNEL_CONNECTION_FAILED`  
-**Solution:** Use local tests instead:
-
-```bash
-# These work without internet
-python simple_demo.py
-python local_test.py
-```
 
 ### Installation Issues
 
